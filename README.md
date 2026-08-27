@@ -1,4 +1,4 @@
-# Car Model Recognition 🚗
+# Car Model Recognition 
 
 Upload a car photo and get a prediction of its **brand**, **model**, and (stretch goal) **approximate generation** — e.g. `BMW 3 Series (2019–2023)`.
 
