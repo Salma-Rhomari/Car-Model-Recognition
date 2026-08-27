@@ -1,9 +1,6 @@
 # Car Model Recognition 
 
 Upload a car photo and get a prediction of its **brand**, **model**, and (stretch goal) **approximate generation** — e.g. `BMW 3 Series (2019–2023)`.
-
-Built with transfer learning on a pretrained CNN backbone, deployed as an interactive Streamlit demo.
-
 ## Project Goals
 
 - Predict car **brand + model** from a single photo (e.g. BMW 3 Series, Mercedes C-Class, Audi A4)
