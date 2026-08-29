@@ -33,3 +33,6 @@ venv/
 # IDE
 .vscode/
 .idea/
+cars_train/
+data-processed/
+data_processed.zip
