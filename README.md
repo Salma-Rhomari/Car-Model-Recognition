@@ -33,7 +33,7 @@ Final model: **ResNet50** (transfer learning, fine-tuned on last layers)
 | Fine-tuning (layer4 + fc) | 67.34% → 69.45% |
 | + stronger augmentation, dropout, lower LR, weight decay | **72.74%** |
 
-- Cahier de charges target (top-1 accuracy ≥ 70%): **achieved**
+- Target (top-1 accuracy ≥ 70%): **achieved**
 - Backbone: ResNet50 pretrained on ImageNet
 - Fine-tuned `layer4` + `fc` layers, with dropout (0.3), data augmentation (crop, flip, rotation, color jitter), Adam (lr=3e-5, weight_decay=1e-4), `ReduceLROnPlateau` scheduler
 - Saved model: `resnet50_best.pth`
