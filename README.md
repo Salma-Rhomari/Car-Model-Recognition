@@ -23,6 +23,21 @@ pip install -r requirements.txt
 3. **Evaluation** via top-1/top-5 accuracy, confusion matrix, and per-class breakdown.
 4. **Grad-CAM** visualizations to show which regions of the image the model uses to make predictions.
 
+## Results
+
+Final model: **ResNet50** (transfer learning, fine-tuned on last layers)
+
+| Stage | Val Accuracy |
+|---|---|
+| Frozen backbone (baseline) | 15.19% → 40.76% |
+| Fine-tuning (layer4 + fc) | 67.34% → 69.45% |
+| + stronger augmentation, dropout, lower LR, weight decay | **72.74%** |
+
+- Cahier de charges target (top-1 accuracy ≥ 70%): **achieved**
+- Backbone: ResNet50 pretrained on ImageNet
+- Fine-tuned `layer4` + `fc` layers, with dropout (0.3), data augmentation (crop, flip, rotation, color jitter), Adam (lr=3e-5, weight_decay=1e-4), `ReduceLROnPlateau` scheduler
+- Saved model: `resnet50_best.pth`
+
 ## Tech Stack
 
 - PyTorch (model + training)
