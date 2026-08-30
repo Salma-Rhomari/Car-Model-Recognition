@@ -1,13 +1,3 @@
-"""
-Grad-CAM visualization: shows which regions of the image the model
-focused on to make its prediction. Great for the demo/portfolio appeal.
-
-Usage:
-    python -m src.gradcam --image path/to/car.jpg
-
-Requires: pip install grad-cam
-"""
-
 import argparse
 import json
 
@@ -41,7 +31,7 @@ def generate_gradcam(model, class_names, image_path: str, backbone: str, device,
     target_layers = get_target_layer(model, backbone)
     cam = GradCAM(model=model, target_layers=target_layers)
 
-    grayscale_cam = cam(input_tensor=input_tensor)[0]
+    grayscale_cam = cam(input_tensor=input_tensor, targets=None)[0]
     visualization = show_cam_on_image(rgb_img.astype(np.float32), grayscale_cam, use_rgb=True)
 
     Image.fromarray(visualization).save(output_path)
