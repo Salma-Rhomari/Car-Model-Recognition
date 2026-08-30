@@ -5,7 +5,6 @@ Model definition for Car Model Recognition using transfer learning.
 import torch.nn as nn
 from torchvision import models
 
-
 def build_model(num_classes: int, backbone: str = "resnet50", freeze_backbone: bool = True):
     """
     Build a transfer-learning classifier on top of a pretrained backbone.
@@ -21,10 +20,13 @@ def build_model(num_classes: int, backbone: str = "resnet50", freeze_backbone: b
     if backbone == "resnet50":
         model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
         if freeze_backbone:
-            for param in model.parameters():
-                param.requires_grad = False
+           for param in model.parameters():
+               param.requires_grad = False
         in_features = model.fc.in_features
-        model.fc = nn.Linear(in_features, num_classes)
+        model.fc = nn.Sequential(
+            nn.Dropout(0.3),
+            nn.Linear(in_features, num_classes)
+    )
 
     elif backbone == "efficientnet_b0":
         model = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.IMAGENET1K_V1)
