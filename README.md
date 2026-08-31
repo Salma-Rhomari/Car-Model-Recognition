@@ -3,9 +3,17 @@
 Upload a car photo and get a prediction of its **brand**, **model**, and (stretch goal) **approximate generation** — e.g. `BMW 3 Series (2019–2023)`.
 ## Project Goals
 
-- Predict car **brand + model** from a single photo (e.g. BMW 3 Series, Mercedes C-Class, Audi A4)
-- Stretch goal: predict approximate **generation/year range** as well
+- Predict car brand + model + year from a single photo (e.g. BMW 3 Series 2012, Mercedes C-Class 2015)
 - Learn and demonstrate: CNN architectures, transfer learning, image preprocessing/augmentation, model evaluation, Grad-CAM interpretability
+- Serve the model through a real API and a usable web interface
+- 
+ ## Tech Stack
+
+- **Model:** PyTorch, torchvision (ResNet50, transfer learning)
+- **Interpretability:** Grad-CAM (`pytorch-grad-cam`), generated dynamically per uploaded image
+- **Backend API:** FastAPI + Uvicorn
+- **Frontend:** Next.js + Tailwind CSS
+- 
 ## Setup
 
 ```bash
@@ -37,12 +45,6 @@ Final model: **ResNet50** (transfer learning, fine-tuned on last layers)
 - Backbone: ResNet50 pretrained on ImageNet
 - Fine-tuned `layer4` + `fc` layers, with dropout (0.3), data augmentation (crop, flip, rotation, color jitter), Adam (lr=3e-5, weight_decay=1e-4), `ReduceLROnPlateau` scheduler
 - Saved model: `resnet50_best.pth`
-
-## Tech Stack
-
-- PyTorch (model + training)
-- Streamlit (demo app)
-- Grad-CAM (interpretability)
 
 ## License
 
