@@ -15,8 +15,7 @@ A full-stack app: FastAPI backend serving the trained model, Next.js frontend fo
 - **Model:** PyTorch, torchvision (ResNet50, transfer learning)
 - **Interpretability:** Grad-CAM (`pytorch-grad-cam`), generated dynamically per uploaded image
 - **Backend API:** FastAPI + Uvicorn
-- **Frontend:** Next.js + Tailwind CSS
-- 
+- **Frontend:** Next.js + Tailwind CSS 
 
 ## Approach
 
