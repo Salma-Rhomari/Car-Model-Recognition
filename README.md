@@ -6,7 +6,10 @@ Upload a car photo and get a prediction of its **brand**, **model**, and (stretc
 - Predict car brand + model + year from a single photo (e.g. BMW 3 Series 2012, Mercedes C-Class 2015)
 - Learn and demonstrate: CNN architectures, transfer learning, image preprocessing/augmentation, model evaluation, Grad-CAM interpretability
 - Serve the model through a real API and a usable web interface
-- 
+## Live Demo
+
+A full-stack app: FastAPI backend serving the trained model, Next.js frontend for uploading photos and viewing predictions with Grad-CAM overlays.
+
  ## Tech Stack
 
 - **Model:** PyTorch, torchvision (ResNet50, transfer learning)
