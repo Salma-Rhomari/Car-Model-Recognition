@@ -1,13 +1,18 @@
+import base64
 import io
 import json
 
+import numpy as np
 import torch
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
 
 from src.data_loader import get_transforms
 from src.model import build_model
+from src.gradcam import get_target_layer
 
 MODEL_PATH = "models/resnet50_best.pth"
 CLASS_NAMES_PATH = "models/class_names.json"
@@ -24,6 +29,8 @@ model.to(device)
 model.eval()
 
 transform = get_transforms(train=False)
+target_layers = get_target_layer(model, BACKBONE)
+cam = GradCAM(model=model, target_layers=target_layers)
 
 app = FastAPI(title="Car Model Recognition API")
 
@@ -57,8 +64,17 @@ async def predict(file: UploadFile = File(...)):
         outputs = model(input_tensor)
         probs = torch.softmax(outputs, dim=1)[0]
         top_prob, top_idx = torch.max(probs, dim=0)
+    rgb_img = np.array(pil_image.resize((224, 224))) / 255.0
+    grayscale_cam = cam(input_tensor=input_tensor, targets=None)[0]
+    visualization = show_cam_on_image(rgb_img.astype(np.float32), grayscale_cam, use_rgb=True)
+
+    gradcam_pil = Image.fromarray(visualization)
+    buffer = io.BytesIO()
+    gradcam_pil.save(buffer, format="PNG")
+    gradcam_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     return {
         "predicted_class": class_names[top_idx.item()],
         "confidence": round(top_prob.item(), 4),
+        "gradcam_image": f"data:image/png;base64,{gradcam_base64}",
     }
