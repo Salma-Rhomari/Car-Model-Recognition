@@ -24,3 +24,96 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Predict button — Uiverse.io by dexter-st, adapted to green */
+.btn-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.btn {
+  --border-radius: 24px;
+  --padding: 4px;
+  --transition: 0.4s;
+  --button-color: #10301f;
+  --highlight-color-hue: 150deg;
+
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0.9em 1.1em;
+  font-family: inherit;
+  font-size: 0.95em;
+  font-weight: 500;
+
+  background-color: var(--button-color);
+
+  box-shadow:
+    inset 0px 1px 1px rgba(255, 255, 255, 0.2),
+    inset 0px 2px 2px rgba(255, 255, 255, 0.15),
+    inset 0px 4px 4px rgba(255, 255, 255, 0.1),
+    inset 0px 8px 8px rgba(255, 255, 255, 0.05),
+    inset 0px 16px 16px rgba(255, 255, 255, 0.05),
+    0px -1px 1px rgba(0, 0, 0, 0.02),
+    0px -2px 2px rgba(0, 0, 0, 0.03),
+    0px -4px 4px rgba(0, 0, 0, 0.05),
+    0px -8px 8px rgba(0, 0, 0, 0.06),
+    0px -16px 16px rgba(0, 0, 0, 0.08);
+
+  border: solid 1px #fff2;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+
+  transition:
+    box-shadow var(--transition),
+    border var(--transition),
+    background-color var(--transition);
+}
+
+.btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-svg {
+  height: 20px;
+  margin-right: 0.5rem;
+  fill: #6ee7b7;
+  filter: drop-shadow(0 0 2px #6ee7b799);
+  transition:
+    fill var(--transition),
+    filter var(--transition);
+}
+
+.txt-wrapper {
+  display: flex;
+}
+
+.btn-letter {
+  color: #a7f3d0;
+  animation: letter-anim 2s ease-in-out infinite;
+}
+
+@keyframes letter-anim {
+  50% {
+    text-shadow: 0 0 3px #6ee7b7cc;
+    color: #d1fae5;
+  }
+}
+
+.btn:hover:not(:disabled) {
+  border: solid 1px hsla(var(--highlight-color-hue), 100%, 80%, 40%);
+}
+
+.btn:hover:not(:disabled) .btn-svg {
+  fill: #d1fae5;
+  filter: drop-shadow(0 0 4px hsl(var(--highlight-color-hue), 100%, 70%));
+}
+
+.btn:active:not(:disabled) {
+  border: solid 1px hsla(var(--highlight-color-hue), 100%, 80%, 70%);
+  background-color: hsla(var(--highlight-color-hue), 50%, 20%, 0.5);
+}
