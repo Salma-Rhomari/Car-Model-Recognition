@@ -29,6 +29,7 @@ model.to(device)
 model.eval()
 
 transform = get_transforms(train=False)
+
 target_layers = get_target_layer(model, BACKBONE)
 cam = GradCAM(model=model, target_layers=target_layers)
 
@@ -36,7 +37,7 @@ app = FastAPI(title="Car Model Recognition API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -63,7 +64,13 @@ async def predict(file: UploadFile = File(...)):
     with torch.no_grad():
         outputs = model(input_tensor)
         probs = torch.softmax(outputs, dim=1)[0]
-        top_prob, top_idx = torch.max(probs, dim=0)
+        top_probs, top_indices = torch.topk(probs, k=3)
+
+    predictions = [
+        {"class_name": class_names[idx.item()], "confidence": round(prob.item(), 4)}
+        for prob, idx in zip(top_probs, top_indices)
+    ]
+
     rgb_img = np.array(pil_image.resize((224, 224))) / 255.0
     grayscale_cam = cam(input_tensor=input_tensor, targets=None)[0]
     visualization = show_cam_on_image(rgb_img.astype(np.float32), grayscale_cam, use_rgb=True)
@@ -74,7 +81,8 @@ async def predict(file: UploadFile = File(...)):
     gradcam_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     return {
-        "predicted_class": class_names[top_idx.item()],
-        "confidence": round(top_prob.item(), 4),
+        "predicted_class": predictions[0]["class_name"],
+        "confidence": predictions[0]["confidence"],
+        "top_predictions": predictions,
         "gradcam_image": f"data:image/png;base64,{gradcam_base64}",
     }
