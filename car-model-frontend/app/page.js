@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -8,14 +8,35 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handleFileChange = (e) => {
-    const selected = e.target.files[0];
-    if (!selected) return;
+  const processFile = (selected) => {
+    if (!selected || !selected.type.startsWith("image/")) return;
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
     setResult(null);
     setError(null);
+  };
+
+  const handleFileChange = (e) => {
+    processFile(e.target.files[0]);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    processFile(e.dataTransfer.files[0]);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragActive(false);
   };
 
   const handleSubmit = async () => {
@@ -43,6 +64,14 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReset = () => {
+    setFile(null);
+    setPreview(null);
+    setResult(null);
+    setError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const formatClassName = (name) =>
@@ -80,7 +109,14 @@ export default function Home() {
           {/* Upload zone */}
           <label
             htmlFor="file-upload"
-            className="group relative flex flex-col items-center justify-center w-full h-56 rounded-xl border border-dashed border-neutral-700 hover:border-emerald-500/50 bg-neutral-950/50 cursor-pointer transition-colors overflow-hidden"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`group relative flex flex-col items-center justify-center w-full h-56 rounded-xl border border-dashed cursor-pointer transition-colors overflow-hidden ${
+              dragActive
+                ? "border-emerald-400 bg-emerald-950/30"
+                : "border-neutral-700 hover:border-emerald-500/50 bg-neutral-950/50"
+            }`}
           >
             {preview ? (
               <img
@@ -108,13 +144,14 @@ export default function Home() {
                   <span className="text-white font-medium">
                     Click to upload
                   </span>{" "}
-                  a car photo
+                  or drag a car photo
                 </p>
                 <p className="text-xs text-neutral-600">JPG or PNG</p>
               </div>
             )}
             <input
               id="file-upload"
+              ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={handleFileChange}
@@ -178,6 +215,30 @@ export default function Home() {
                 />
               </div>
 
+              {/* Top-3 predictions */}
+              {result.top_predictions && result.top_predictions.length > 1 && (
+                <div className="mt-5 pt-5 border-t border-neutral-800">
+                  <p className="text-xs tracking-widest text-neutral-500 uppercase mb-3">
+                    Other possibilities
+                  </p>
+                  <div className="space-y-2">
+                    {result.top_predictions.slice(1).map((pred, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="text-neutral-300">
+                          {formatClassName(pred.class_name)}
+                        </span>
+                        <span className="text-neutral-500">
+                          {(pred.confidence * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {result.gradcam_image && (
                 <div className="mt-5 pt-5 border-t border-neutral-800">
                   <p className="text-xs tracking-widest text-neutral-500 uppercase mb-3">
@@ -190,6 +251,13 @@ export default function Home() {
                   />
                 </div>
               )}
+
+              <button
+                onClick={handleReset}
+                className="mt-5 w-full text-sm text-neutral-400 hover:text-white border border-neutral-800 hover:border-neutral-600 rounded-lg py-2.5 transition-colors"
+              >
+                Try another photo
+              </button>
             </div>
           )}
         </div>

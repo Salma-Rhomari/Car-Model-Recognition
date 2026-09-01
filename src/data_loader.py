@@ -1,15 +1,3 @@
-"""
-Dataset and DataLoader utilities for the Car Model Recognition project.
-
-Expects data organized as:
-    data/processed/train/<class_name>/*.jpg
-    data/processed/val/<class_name>/*.jpg
-    data/processed/test/<class_name>/*.jpg
-
-Where <class_name> encodes brand_model (and optionally generation), e.g.
-"bmw_3series" or "bmw_3series_2019-2023".
-"""
-
 import os
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
