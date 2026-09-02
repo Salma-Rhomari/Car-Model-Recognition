@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -9,10 +9,15 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+
   const fileInputRef = useRef(null);
 
   const processFile = (selected) => {
-    if (!selected || !selected.type.startsWith("image/")) return;
+    if (!selected || !selected.type.startsWith("image/")) {
+      setError("Please select a valid image file.");
+      return;
+    }
+
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
     setResult(null);
@@ -20,13 +25,13 @@ export default function Home() {
   };
 
   const handleFileChange = (e) => {
-    processFile(e.target.files[0]);
+    processFile(e.target.files?.[0]);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setDragActive(false);
-    processFile(e.dataTransfer.files[0]);
+    processFile(e.dataTransfer.files?.[0]);
   };
 
   const handleDragOver = (e) => {
@@ -55,30 +60,51 @@ export default function Home() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
 
       const data = await res.json();
       setResult(data);
     } catch (err) {
-      setError(err.message);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while analyzing the image."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleReset = () => {
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+
     setFile(null);
     setPreview(null);
     setResult(null);
     setError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const formatClassName = (name) =>
     name
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
+      ?.split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ") || "Unknown";
 
   const buttonText = loading ? "Analyzing" : "Predict";
 
@@ -96,11 +122,14 @@ export default function Home() {
           <p className="text-xs tracking-[0.3em] text-neutral-500 uppercase mb-3">
             AI Recognition
           </p>
+
           <h1 className="text-3xl font-semibold tracking-tight">
             Car Model Recognition
           </h1>
+
           <p className="text-neutral-400 mt-2 text-sm">
-            A deep learning model trained to identify car make, model, and year — with visual insight into how it makes each prediction.
+            A deep learning model trained to identify car make, model, and
+            year — with visual insight into how it makes each prediction.
           </p>
         </div>
 
@@ -121,7 +150,7 @@ export default function Home() {
             {preview ? (
               <img
                 src={preview}
-                alt="Preview"
+                alt="Selected car preview"
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -140,15 +169,20 @@ export default function Home() {
                     d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3.75 3.75 0 014.977 4.34A4.501 4.501 0 0118 19.5H6.75z"
                   />
                 </svg>
+
                 <p className="text-sm text-neutral-400">
                   <span className="text-white font-medium">
                     Click to upload
                   </span>{" "}
                   or drag a car photo
                 </p>
-                <p className="text-xs text-neutral-600">JPG or PNG</p>
+
+                <p className="text-xs text-neutral-600">
+                  JPG or PNG
+                </p>
               </div>
             )}
+
             <input
               id="file-upload"
               ref={fileInputRef}
@@ -161,7 +195,11 @@ export default function Home() {
 
           {/* Predict button */}
           <div className="btn-wrapper mt-6">
-            <button onClick={handleSubmit} disabled={!file || loading} className="btn">
+            <button
+              onClick={handleSubmit}
+              disabled={!file || loading}
+              className="btn"
+            >
               <svg
                 className="btn-svg"
                 xmlns="http://www.w3.org/2000/svg"
@@ -173,6 +211,7 @@ export default function Home() {
                   d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
                 />
               </svg>
+
               <div className="txt-wrapper">
                 {buttonText.split("").map((char, i) => (
                   <span
@@ -189,7 +228,9 @@ export default function Home() {
 
           {/* Error */}
           {error && (
-            <p className="mt-4 text-sm text-red-400 text-center">{error}</p>
+            <p className="mt-4 text-sm text-red-400 text-center">
+              {error}
+            </p>
           )}
 
           {/* Result */}
@@ -198,52 +239,71 @@ export default function Home() {
               <p className="text-xs tracking-widest text-neutral-500 uppercase mb-1">
                 Predicted
               </p>
+
               <p className="text-xl font-semibold mb-4">
                 {formatClassName(result.predicted_class)}
               </p>
 
+              {/* Confidence */}
               <div className="flex items-center justify-between text-sm text-neutral-400 mb-2">
                 <span>Confidence</span>
+
                 <span className="text-white font-medium">
-                  {(result.confidence * 100).toFixed(1)}%
+                  {result.confidence != null
+                    ? `${(result.confidence * 100).toFixed(1)}%`
+                    : "N/A"}
                 </span>
               </div>
+
               <div className="w-full h-1.5 rounded-full bg-neutral-800 overflow-hidden">
                 <div
                   className="h-full bg-emerald-500 transition-all duration-500"
-                  style={{ width: `${result.confidence * 100}%` }}
+                  style={{
+                    width: `${
+                      result.confidence != null
+                        ? result.confidence * 100
+                        : 0
+                    }%`,
+                  }}
                 />
               </div>
 
               {/* Top-3 predictions */}
-              {result.top_predictions && result.top_predictions.length > 1 && (
-                <div className="mt-5 pt-5 border-t border-neutral-800">
-                  <p className="text-xs tracking-widest text-neutral-500 uppercase mb-3">
-                    Other possibilities
-                  </p>
-                  <div className="space-y-2">
-                    {result.top_predictions.slice(1).map((pred, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <span className="text-neutral-300">
-                          {formatClassName(pred.class_name)}
-                        </span>
-                        <span className="text-neutral-500">
-                          {(pred.confidence * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {result.top_predictions &&
+                result.top_predictions.length > 1 && (
+                  <div className="mt-5 pt-5 border-t border-neutral-800">
+                    <p className="text-xs tracking-widest text-neutral-500 uppercase mb-3">
+                      Other possibilities
+                    </p>
 
+                    <div className="space-y-2">
+                      {result.top_predictions
+                        .slice(1)
+                        .map((pred, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between text-sm"
+                          >
+                            <span className="text-neutral-300">
+                              {formatClassName(pred.class_name)}
+                            </span>
+
+                            <span className="text-neutral-500">
+                              {(pred.confidence * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Grad-CAM */}
               {result.gradcam_image && (
                 <div className="mt-5 pt-5 border-t border-neutral-800">
                   <p className="text-xs tracking-widest text-neutral-500 uppercase mb-3">
                     Where the model looked
                   </p>
+
                   <img
                     src={result.gradcam_image}
                     alt="Grad-CAM visualization"
@@ -252,6 +312,7 @@ export default function Home() {
                 </div>
               )}
 
+              {/* Reset */}
               <button
                 onClick={handleReset}
                 className="mt-5 w-full text-sm text-neutral-400 hover:text-white border border-neutral-800 hover:border-neutral-600 rounded-lg py-2.5 transition-colors"
@@ -262,9 +323,31 @@ export default function Home() {
           )}
         </div>
 
-        <p className="text-center text-xs text-neutral-600 mt-8">
-          Powered by ResNet50 · Trained on the Stanford Cars Dataset
-        </p>
+        {/* Footer */}
+        <div className="text-center mt-8 space-y-3">
+          <p className="text-xs text-neutral-600">
+            Powered by ResNet50 · Trained on the Stanford Cars Dataset
+          </p>
+
+          {/* FIXED: missing opening <a> tag */}
+          <a
+            href="https://github.com/Salma-Rhomari/Car-Model-Recognition"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-emerald-400 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="w-3.5 h-3.5"
+              fill="currentColor"
+            >
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.754-1.333-1.754-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.809 1.304 3.495.997.108-.775.42-1.305.763-1.605-2.665-.303-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+            </svg>
+
+            View on GitHub
+          </a>
+        </div>
       </div>
     </main>
   );
